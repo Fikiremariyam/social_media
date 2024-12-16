@@ -127,7 +127,12 @@ class  _LogInPageState extends State<LogInPage> {
             showAuthResult(context, 'wrong password.');
           } else if (error.code == 'invalid-email') {
             showAuthResult(context, 'there is no account registerd with this email ');
-          } else {
+          } else if (error.code == 'invalid-credential'){
+             showAuthResult(context, 'wrong emai or password .');
+
+          }
+            else {
+           
             showAuthResult(context, 'An unexpected error occurred.');
           }
         } else {

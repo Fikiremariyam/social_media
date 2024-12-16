@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -137,18 +138,30 @@ class  _SignupState extends State<Signup> {
             ),
             SizedBox(
                     height:40.0,
-                    child: ElevatedButton(onPressed: (){if (key.currentState?.validate() ?? false) {
-  FirebaseAuth.instance.createUserWithEmailAndPassword(email: email!, password: Password!)
-      .then((userCredential) {
-        // Authentication successful
+                    child: ElevatedButton(onPressed: () async {if (key.currentState?.validate() ?? false) {
+                        
+                 
+      try{
+          UserCredential usercred =  await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email!, password: Password!);
+          // Authentication successful
         showSuccessMessage(context, null);
-        if (mounted){
-        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> const Homepage()));
-      }
+        if (usercred.user != null) {
+          var data ={
+            'username' : username,
+            'email' : email,
+            'passeord':Password,
+            'createdat' : DateTime.now()
+          };
 
-        
-      })
-      .catchError((error) {
+
+          await FirebaseFirestore.instance.collection('users').doc(usercred.user!.uid).set(data);
+
+        }
+        if (mounted){
+            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> const Homepage()));
+        }
+      }on FirebaseAuthException catch  (
+        error) {
         // Authentication failed
         if (error is FirebaseAuthException) {
           if (error.code == 'weak-password') {
@@ -161,7 +174,7 @@ class  _SignupState extends State<Signup> {
         } else {
           showAuthResult(context, 'An unexpected error occurred.');
         }
-      });
+      };
 }
                                                         }, 
               child:  const Text("signup"))

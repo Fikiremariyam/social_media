@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:social_media/Home/HomePage.dart';
-import 'package:social_media/views/login.dart';
-import 'package:social_media/views/signup.dart';
+import 'package:social_media/views/Home/HomePage.dart';
+import 'package:social_media/views/auth/login.dart';
+import 'package:social_media/views/auth/signup.dart';
 
 void main()  async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner:  false,
       title: 'TeraFlow',
       theme: ThemeData(
         fontFamily: GoogleFonts.ibmPlexSans().fontFamily,

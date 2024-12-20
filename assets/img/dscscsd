@@ -1,0 +1,62 @@
+   if(snapshot.hasData){
+                if(snapshot.data?.docs.isEmpty ?? false){
+                  return Text("No user Found!");
+                }
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: snapshot.data?.docs.length ?? 0,
+                  itemBuilder: (context,index){
+                    DocumentSnapshot doc = snapshot.data!.docs[index];
+                  
+                  return ListTile(
+                     title: Text(doc['username']),
+                      trailing: FutureBuilder<DocumentSnapshot>(
+                        future: doc.reference.collection('followers').doc(FirebaseAuth.instance.currentUser!.email).get() ,
+                         builder: (context,snapshot){
+
+                          if (snapshot.hasData){
+                            if (snapshot.data?.exists ?? false){
+                              return ElevatedButton(
+                                onPressed: ()async{
+                                  await doc.reference.collection('followers').doc(FirebaseAuth.instance.currentUser!.email).delete();
+                                setState(() {}); // to refresh  the state it rebuild the whole app **not recomnded in production level apps          
+
+
+                                },
+                                child: Text("Un Follow")
+                                );
+
+                            }
+                          }
+                            return ElevatedButton(onPressed: () async {
+                             await   doc.reference.collection('followers').doc(FirebaseAuth.instance.currentUser!.email).set(
+                                {
+                                  'followed by ': FirebaseAuth.instance.currentUser?.email,
+                                  'time':DateTime.now(),
+
+                                }
+                              );
+
+                              setState(() {});
+                            },
+                             child: Text("Follow")
+                             );
+                          
+                         })
+                     
+                  );
+                
+                }),
+              );
+
+              } 
+              else {
+                return  const CircularProgressIndicator();
+
+              }
+
+
+
+            },),
+             
+        

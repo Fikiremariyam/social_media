@@ -1,41 +1,19 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:form_validator/form_validator.dart';
-import 'package:social_media/Home/HomePage.dart';
-import 'package:social_media/views/login.dart';
+import 'package:social_media/views/Home/HomePage.dart';
+import 'package:social_media/views/auth/signup.dart';
  
-class Signup extends StatefulWidget {
-  const Signup({super.key});
+class LogInPage extends StatefulWidget {
+  const LogInPage({super.key});
 
   @override
-  State <Signup> createState() =>  _SignupState();
-}
-
-void showSuccessMessage(BuildContext context, String? successMessage) {
-  
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Success'),
-          content: Text('You have logged in successfully!'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
+  State <LogInPage> createState() =>  _LogInPageState();
 }
 
 
-void showAuthResult(BuildContext context, String? errorMessage) {
+bool showAuthResult(BuildContext context, String? errorMessage)  {
   if (errorMessage != null) {
     showDialog(
       context: context,
@@ -54,6 +32,7 @@ void showAuthResult(BuildContext context, String? errorMessage) {
         );
       },
     );
+    return true;
   } else {
     showDialog(
       context: context,
@@ -72,9 +51,11 @@ void showAuthResult(BuildContext context, String? errorMessage) {
         );
       },
     );
+  
+  return false;
   }
 }
-class  _SignupState extends State<Signup> {
+class  _LogInPageState extends State<LogInPage> {
   //ToDo  for me : ensure that the username is unique before regestring 
 
   GlobalKey<FormState> key = GlobalKey<FormState>();
@@ -88,23 +69,13 @@ class  _SignupState extends State<Signup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-                    title: const Text("Sign Up fuck u ")),
+                    title: const Text("log in page  ")),
       body: Form(
         key:key,
         child: ListView(
           padding: const EdgeInsets.all(12.0),
           children: [
-            TextFormField(
-                          decoration:  const InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      labelText: "User Name",
-                                      ),
-                          validator: ValidationBuilder().maxLength(10).build(),
-                          onChanged: (value){
-                            username = value;
-                          },
-                          )
-          ,const SizedBox(
+        const SizedBox(
                           height: 40.0,
                           ),
             TextFormField(
@@ -138,48 +109,57 @@ class  _SignupState extends State<Signup> {
             ),
             SizedBox(
                     height:40.0,
-                    child: ElevatedButton(onPressed: () async {if (key.currentState?.validate() ?? false) {
+                    child: ElevatedButton(onPressed: () async{
+                    if (key.currentState?.validate() ?? false) {
+                      try {
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(email: email!, password: Password!);
                         
-                 
-      try{
-          UserCredential usercred =  await FirebaseAuth.instance.createUserWithEmailAndPassword(email: email!, password: Password!);
-          // Authentication successful
-        showSuccessMessage(context, null);
-        if (usercred.user != null) {
-          var data ={
-            'username' : username,
-            'email' : email,
-            'passeord':Password,
-            'createdat' : DateTime.now()
-          };
+                        showAuthResult(context, null);
+                        if (mounted){
+                        Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> const Homepage()));
+                    
+                          }
 
+                        } on FirebaseAuthException catch (
+                          error) {
+                          // Authentication failed
+                          if (error is FirebaseAuthException) {
+                            if (error.code == 'wrong-password') {
+                              showAuthResult(context, 'wrong password.');
+                            } else if (error.code == 'invalid-email') {
+                              showAuthResult(context, 'there is no account registerd with this email ');
+                            } else if (error.code == 'invalid-credential'){
+                              showAuthResult(context, 'wrong emai or password .');
 
-          await FirebaseFirestore.instance.collection('users').doc(usercred.user!.uid).set(data);
-
-        }
-        if (mounted){
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context)=> const Homepage()));
-        }
-      }on FirebaseAuthException catch  (
-        error) {
-        // Authentication failed
-        if (error is FirebaseAuthException) {
-          if (error.code == 'weak-password') {
-            showAuthResult(context, 'Password is too weak.');
-          } else if (error.code == 'email-already-in-use') {
-            showAuthResult(context, 'Email is already in use.');
-          } else {
-            showAuthResult(context, 'An unexpected error occurred.');
-          }
-        } else {
-          showAuthResult(context, 'An unexpected error occurred.');
-        }
-      };
-}
+                            }
+                              else {
+                            
+                              showAuthResult(context, 'An unexpected error occurred.');
+                            }
+                          } else {
+                            showAuthResult(context, 'An unexpected exeption  occurred.');
+                          }
+                        };
+                  }
                                                         }, 
-              child:  const Text("signup"))
-            )
-          ],
+              child:  const Text("login"))
+            ),
+
+          
+          SizedBox(
+            height: 12.0,
+          ),
+          SizedBox(
+            height: 40,
+            child: TextButton(
+              child: Text("rgister if you dont have account"),
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context)=> const Signup())
+    
+            ),
+
+          ),
+          )
+          ],//children
 
 
         ),

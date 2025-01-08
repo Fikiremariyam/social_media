@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:social_media/views/Home/searchPage.dart';
+import 'package:social_media/views/Home/utils/image_post.dart';
+import 'package:social_media/views/Home/utils/text_post.dart';
 import 'package:social_media/views/auth/login.dart';
 
 class Homepage extends StatefulWidget {
@@ -12,7 +14,9 @@ class Homepage extends StatefulWidget {
   State<Homepage> createState() => _HomepageState();
 }
 
+
 class _HomepageState extends State<Homepage> {
+  TextEditingController posttext =  TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +45,7 @@ class _HomepageState extends State<Homepage> {
       drawer: Drawer(
         child: ListView(
           children: [
+            Expanded(child: Text( FirebaseAuth.instance.currentUser?.email ?? 'no email avalibe ' )),
             ListTile(
               onTap: () async{
                             FirebaseAuth.instance.signOut(); 
@@ -55,6 +60,103 @@ class _HomepageState extends State<Homepage> {
           ],
         ),
       ),
+      body: Padding(padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration( border: Border.all(color: Colors.green)),
+            padding: EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: posttext,
+                  decoration: InputDecoration(
+                    labelText:  "post something"
+
+
+                  ),
+                ),
+                SizedBox(height: 4.0,),
+
+                Row(children: [
+                  ElevatedButton(
+                    onPressed: () async {
+                      var Data = {
+                        'time':DateTime.now(),
+                        'type':'text',
+                        'content':posttext.text,
+                        'uid':FirebaseAuth.instance.currentUser!.uid
+                      };
+                      FirebaseFirestore.instance.collection('posts').add(Data);
+                      posttext.text="";
+                      setState(() {
+  
+                      });
+
+
+                    },
+                    child: Text("post"),
+                  )
+                ],)
+
+              ],
+            ),
+         
+          )
+          
+          ,
+          Expanded(
+            child:FutureBuilder<QuerySnapshot>(
+              future: FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).collection('timeline').get(),
+            builder: (context,snapshot){
+
+              if (snapshot.hasData){
+                if (snapshot.data?.docs.isEmpty ??true){
+                  return Text("noposts avalibe ");
+
+                }
+                else{
+                  return ListView.builder(
+                    itemCount: snapshot.data?.docs.length ?? 0 ,
+                    itemBuilder: (context,index){
+                      
+                      return FutureBuilder<DocumentSnapshot>(
+
+                        future: FirebaseFirestore.instance.collection('posts').doc((snapshot.data?.docs[index].data() as Map)['post'] ).get(),
+                         builder: (context,postsnapshot){
+                          
+                          if (postsnapshot.hasData){
+
+                            switch (postsnapshot.data!['type']){
+                              case 'text':
+                              return TextPost(text: postsnapshot.data!['content']);
+                              case 'image':
+                              return ImagePost(text: postsnapshot.data!['content'], url: postsnapshot.data!['url']);
+
+                              default:
+                              return TextPost(text: postsnapshot.data!['content']);
+
+                            }
+                          }else{
+                            return  CircularProgressIndicator();
+                          }
+                         }
+                         );
+                    },
+                    );
+                }
+              }else{
+                return LinearProgressIndicator();
+              }
+
+            }) 
+          )
+        ],
+      ),
+      
+      ),
+
+      
     );
     }
 }

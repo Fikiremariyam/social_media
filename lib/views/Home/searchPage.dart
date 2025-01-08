@@ -39,7 +39,7 @@ class _SearchpageState extends State<Searchpage> {
               ),
               onChanged: (val){
                 username=val;
-                setState(() {
+                setState(() {// to refresh the state of ther name 
                   
                 });
               },
@@ -51,7 +51,7 @@ class _SearchpageState extends State<Searchpage> {
             future: FirebaseFirestore.instance.collection('users').where('username',isEqualTo: username).get(),// passed the search result to the snapshot
             builder: (context,snapshot){
               var filtered = snapshot.data!.docs.where((doc){
-                return doc['email'] != FirebaseAuth.instance.currentUser!.email;
+                return doc['email'] != FirebaseAuth.instance.currentUser!.email;//exluding the seracers email 
               }
               ).toList();
               
@@ -90,7 +90,8 @@ class _SearchpageState extends State<Searchpage> {
                                   'followed by ': FirebaseAuth.instance.currentUser?.email,
                                   'time':DateTime.now(),
 
-                                }
+                                }// here we  are regstering the current email we have logeed in to to the followrs section for the searched account 
+                                // improvemrnt : we can register the followed accouint to the cureent email  people i follow section 
                               );
 
                               setState(() {});

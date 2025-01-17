@@ -107,26 +107,45 @@ class _HomepageState extends State<Homepage> {
           ,
           Expanded(
             child:FutureBuilder<QuerySnapshot>(
-              future: FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.uid).collection('timeline').get(),
+              future: FirebaseFirestore.instance.collection('users').doc(FirebaseAuth.instance.currentUser!.email).collection('timeline').get(),
             builder: (context,snapshot){
 
               if (snapshot.hasData){
                 if (snapshot.data?.docs.isEmpty ??true){
                   return Text("noposts avalibe ");
 
-                }
-                else{
+                }else{
                   return ListView.builder(
                     itemCount: snapshot.data?.docs.length ?? 0 ,
                     itemBuilder: (context,index){
-                      
+                      QueryDocumentSnapshot doc =  snapshot.data!.docs[index];
                       return FutureBuilder<DocumentSnapshot>(
 
-                        future: FirebaseFirestore.instance.collection('posts').doc((snapshot.data?.docs[index].data() as Map)['post'] ).get(),
+                        future: FirebaseFirestore.instance.collection('posts').doc((snapshot.data?.docs[index].data() as Map)['posts'] ).get(),
                          builder: (context,postsnapshot){
-                          
+                          print("=========================debugging===========");
+                          print(snapshot.data!.docs[0]['content']);
+                    
+                          print("=========================close debugging===========");
                           if (postsnapshot.hasData){
 
+                                var userData = postsnapshot.data!.data() as Map<String, dynamic>;
+
+                              // Prepare the fields from the document data
+                              List<Widget> fields = [];
+
+                              userData.forEach((key, value) {
+                                fields.add(
+                                  Text('$key: $value', style: TextStyle(fontSize: 18)),
+                                );
+                              });
+
+                              // Return the UI with user data
+                              return ListView(
+                                children: fields,
+                              );
+                            
+                            return Text(postsnapshot.data.toString());
                             switch (postsnapshot.data!['type']){
                               case 'text':
                               return TextPost(text: postsnapshot.data!['content']);

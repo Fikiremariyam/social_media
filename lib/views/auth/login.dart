@@ -55,6 +55,7 @@ bool showAuthResult(BuildContext context, String? errorMessage)  {
   return false;
   }
 }
+
 class  _LogInPageState extends State<LogInPage> {
   //ToDo  for me : ensure that the username is unique before regestring 
 
@@ -109,7 +110,8 @@ class  _LogInPageState extends State<LogInPage> {
             ),
             SizedBox(
                     height:40.0,
-                    child: ElevatedButton(onPressed: () async{
+                    child: ElevatedButton(
+                      onPressed: () async{
                     if (key.currentState?.validate() ?? false) {
                       try {
                         await FirebaseAuth.instance.signInWithEmailAndPassword(email: email!, password: Password!);

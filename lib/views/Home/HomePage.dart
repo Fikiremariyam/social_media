@@ -158,8 +158,9 @@ class _HomepageState extends State<Homepage> {
                               return TextPost(text: userData['content']);
                               case 'image':
                               print("image printed");
-                              print(userData.values);
-                              return ImagePost(text: userData['content'], url: userData['url']);
+                              print(userData.keys);
+                              print(userData['content ']);
+                              return ImagePost(text: userData['content '], url: userData['url']);
 
                               default:
                               return TextPost(text: postsnapshot.data!['content']);

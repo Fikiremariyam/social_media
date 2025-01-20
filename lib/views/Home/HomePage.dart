@@ -118,18 +118,25 @@ class _HomepageState extends State<Homepage> {
                   return ListView.builder(
                     itemCount: snapshot.data?.docs.length ?? 0 ,
                     itemBuilder: (context,index){
-                      QueryDocumentSnapshot doc =  snapshot.data!.docs[index];
+                      QueryDocumentSnapshot doc =  snapshot.data!.docs[index]; // fetched the contents of timeline of posts
+                      /*
+                      print("the time line ");
+                      
+                      Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                      print("Document ID: ${doc.id}");
+                      data.forEach((key, value) {
+                        print("$key: $value");
+                      });
+                      print("-------------------");
+                      */
                       return FutureBuilder<DocumentSnapshot>(
 
-                        future: FirebaseFirestore.instance.collection('posts').doc((snapshot.data?.docs[index].data() as Map)['posts'] ).get(),
+                        future: FirebaseFirestore.instance.collection('posts').doc( doc['body'] ).get() ,
                          builder: (context,postsnapshot){
-                          print("=========================debugging===========");
-                          print(snapshot.data!.docs[0]['content']);
-                    
-                          print("=========================close debugging===========");
                           if (postsnapshot.hasData){
 
-                                var userData = postsnapshot.data!.data() as Map<String, dynamic>;
+                              var userData = postsnapshot.data!.data() as Map<String, dynamic>;
+                            /*
 
                               // Prepare the fields from the document data
                               List<Widget> fields = [];
@@ -139,18 +146,20 @@ class _HomepageState extends State<Homepage> {
                                   Text('$key: $value', style: TextStyle(fontSize: 18)),
                                 );
                               });
+                              */
+                              print("ffffffffffffffffffff  the fields of the current post  ++++++++++++++++++=");
+                              print(userData);
 
-                              // Return the UI with user data
-                              return ListView(
-                                children: fields,
-                              );
+
                             
-                            return Text(postsnapshot.data.toString());
-                            switch (postsnapshot.data!['type']){
+                            
+                            switch (userData['type']){
                               case 'text':
-                              return TextPost(text: postsnapshot.data!['content']);
+                              return TextPost(text: userData['content']);
                               case 'image':
-                              return ImagePost(text: postsnapshot.data!['content'], url: postsnapshot.data!['url']);
+                              print("image printed");
+                              print(userData.values);
+                              return ImagePost(text: userData['content'], url: userData['url']);
 
                               default:
                               return TextPost(text: postsnapshot.data!['content']);

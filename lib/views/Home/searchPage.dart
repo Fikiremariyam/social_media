@@ -50,6 +50,10 @@ class _SearchpageState extends State<Searchpage> {
           if (username!.length > 3) FutureBuilder<QuerySnapshot>(
             future: FirebaseFirestore.instance.collection('users').where('username',isEqualTo: username).get(),// passed the search result to the snapshot
             builder: (context,snapshot){
+              for (var doc in snapshot.data!.docs) {
+               print(doc.id); // Prints the document ID
+              print(doc.data()); // Prints the document data as a map
+                  }
               var filtered = snapshot.data!.docs.where((doc){
                 return doc['email'] != FirebaseAuth.instance.currentUser!.email;//exluding the seracers email 
               }
@@ -65,6 +69,51 @@ class _SearchpageState extends State<Searchpage> {
                     DocumentSnapshot doc = filtered[index];
                   
                   return ListTile(
+                    leading: IconButton(onPressed: () async{
+                      //print("searched user");
+                      var userData = doc.data() as Map<String, dynamic>;
+                    //  print(FirebaseAuth.instance.currentUser!.email);
+                    //  print(userData);
+
+                      
+                        QuerySnapshot q = await FirebaseFirestore.instance.collection('chats').where('users',arrayContains: FirebaseAuth.instance.currentUser!.email).get(); 
+                     //Note : q retives all the chat that have our email address we have to filter it letter
+                        bool chatExists = false;
+
+                          // Iterate through the results to check if the other user's email is also in the users array
+                          for (var doc in q.docs) {
+                            final data = doc.data() as Map<String, dynamic>;
+                            if (data['users'] != null && data['users'].contains(userData['email'])) {
+                              chatExists = true;
+                              print("Chat exists: ${doc.id}");
+                              break;
+                            }
+                          }
+                    if ( chatExists == false ){
+                        //create a new chat 
+                        print("nodoc");
+                        // the data
+                         var data ={
+                          'users':[
+                            FirebaseAuth.instance.currentUser!.email,
+                            userData['email'],
+
+                          ],
+                          "recent_text":"HI",
+                        };
+                        // sening fifrebase command
+                        await FirebaseFirestore.instance.collection('chats').add(data);
+
+
+
+                       }
+                      else {
+                        // continue from last chat
+                        print("yesdoc");
+                       
+                      }
+
+                    }, icon: Icon(Icons.chat),color: Colors.indigo,),
                      title: Text(doc['username']),
                       trailing: FutureBuilder<DocumentSnapshot>(
                         future: doc.reference.collection('followers').doc(FirebaseAuth.instance.currentUser!.email).get() ,
@@ -75,14 +124,17 @@ class _SearchpageState extends State<Searchpage> {
                               return ElevatedButton(
                                 onPressed: ()async{
                                   await doc.reference.collection('followers').doc(FirebaseAuth.instance.currentUser!.email).delete();
-                                setState(() {}); // to refresh  the state it rebuild the whole app **not recomnded in production level apps          
+                                setState(() async{
+
+                                }); // to refresh  the state it rebuild the whole app **not recomnded in production level apps          
 
 
                                 },
                                 child: Text("Un Follow")
                                 );
 
-                            }
+                            };
+
                           }
                             return ElevatedButton(onPressed: () async {
                              await   doc.reference.collection('followers').doc(FirebaseAuth.instance.currentUser!.email).set(

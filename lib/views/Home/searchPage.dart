@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:social_media/views/Home/utils/chatPage.dart';
 class Searchpage extends StatefulWidget {
   const Searchpage({super.key});
 
@@ -84,8 +85,10 @@ class _SearchpageState extends State<Searchpage> {
                           for (var doc in q.docs) {
                             final data = doc.data() as Map<String, dynamic>;
                             if (data['users'] != null && data['users'].contains(userData['email'])) {
-                              chatExists = true;
+                              //chatExists = true;
                               print("Chat exists: ${doc.id}");
+                              //Navigator.of(context).push(MaterialPageRoute(builder: (context)=> Chatpage(doc: doc)));
+
                               break;
                             }
                           }
@@ -102,16 +105,12 @@ class _SearchpageState extends State<Searchpage> {
                           "recent_text":"HI",
                         };
                         // sening fifrebase command
-                        await FirebaseFirestore.instance.collection('chats').add(data);
-
+                       DocumentReference newchat = await FirebaseFirestore.instance.collection('chats').add(data);
+                       DocumentSnapshot newsnapshot =  await newchat.get();
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context)=> Chatpage(doc: newsnapshot)));
 
 
                        }
-                      else {
-                        // continue from last chat
-                        print("yesdoc");
-                       
-                      }
 
                     }, icon: Icon(Icons.chat),color: Colors.indigo,),
                      title: Text(doc['username']),

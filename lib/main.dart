@@ -5,8 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:social_media/views/Home/HomePage.dart';
 import 'package:social_media/views/auth/login.dart';
 import 'package:social_media/views/auth/signup.dart';
-
+import 'package:zego_zimkit/zego_zimkit.dart';
 void main()  async {
+  await ZIMKit().init(
+    appID: 54234541 ,
+    appSign: '3dce0357b70a0630fffab6416c246760603f2b78706532cde548f5d3e11d4afa' ,
+
+    );
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());

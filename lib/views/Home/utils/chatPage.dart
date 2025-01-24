@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:social_media/views/Home/utils/messagebox.dart';
 
 class Chatpage extends StatefulWidget {
   final DocumentSnapshot doc;
@@ -24,7 +25,7 @@ class _ChatpageState extends State<Chatpage> {
         children: [
           Expanded(
             child: StreamBuilder(
-            stream: widget.doc.reference.collection('messages').snapshots(), 
+            stream: widget.doc.reference.collection('messages').orderBy('time').snapshots(), 
           builder: (context, snapshot){
             if(snapshot.hasData){
               if (snapshot.data?.docs.isEmpty ?? true){
@@ -36,56 +37,9 @@ class _ChatpageState extends State<Chatpage> {
                     itemCount: snapshot.data?.docs.length ?? 0 ,
                     itemBuilder: (context, index){
                       DocumentSnapshot msg =snapshot.data!.docs[index];
-                    if (msg['uid']== FirebaseAuth.instance.currentUser!.email){
-                      return Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children:[ Container(
-                              width:MediaQuery.of(context).size.width * 0.5 ,
-                               
-                              decoration: BoxDecoration(
-                                color: Colors.indigo.shade100,
-                                borderRadius: BorderRadiusDirectional.circular(12.0),
-                               
-                            
-                              ),
-                              padding: EdgeInsets.all(9.0),
-                              child: Text(msg['message'].toString()),
-                            
-                            ),
-                                     ]
-                          ),
-                        SizedBox(height: 5,)
-                        ],
-                      );
-                    }else{
-                      return Column(
-                        children: [
-                          Row(
-                            
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children:[ Container(
-                              width:MediaQuery.of(context).size.width * 0.5 ,
-                               
-                              decoration: BoxDecoration(
-                                color: Colors.yellow.shade100,
-                                borderRadius: BorderRadiusDirectional.circular(15.0),
-                                
-                            
-                              ),
-                              padding: EdgeInsets.all(9.0),
-                              child: Text(
-                                textAlign: TextAlign.left,
-                                msg['message'].toString()),
-                            
-                            ),
-                                     ]
-                          ),
-                        
-                        SizedBox(height: 10)],
-                      );
-                    }
+                    return
+                      TelegramMessageBubble(message: msg['message'].toString(), isSentByMe: msg['uid']== FirebaseAuth.instance.currentUser!.email) ;
+                      
                
                     }
              );
@@ -122,7 +76,10 @@ class _ChatpageState extends State<Chatpage> {
                            'message' : message.text,
 
                         }
+                        
                       );
+                      message.clear();
+                        
                         },
                     child: Text("send"),
                    )

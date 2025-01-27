@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:social_media/views/Home/utils/call.dart';
 import 'package:social_media/views/Home/utils/messagebox.dart';
 
 class Chatpage extends StatefulWidget {
@@ -17,10 +18,31 @@ class Chatpage extends StatefulWidget {
 
 class _ChatpageState extends State<Chatpage> {
   TextEditingController message = TextEditingController();
+  final String user = FirebaseAuth.instance.currentUser!.email.toString() ?? "current user"; 
+  final String reciver = "user2";
+  final String reciverusername = "amanuel";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:  AppBar(title: Text("chatting page "),),
+      appBar:  AppBar(
+        title: Text("chatting page "),
+         actions: [IconButton(onPressed: (){
+                                    Navigator.of(context).push(MaterialPageRoute (
+                                    builder: (context) =>  CallPage(
+                                      callID: user+ "abcd",
+                                      userId:reciver ,
+                                      username : reciverusername,
+                                      
+
+                                    )
+                                    ),
+                                    );//navigator
+
+                                    },  
+                                    icon: Icon(Icons.video_call))
+                                    ],
+      
+        ),
       body: Column(
         children: [
           Expanded(
